@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useState } from "react";
+import {useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
@@ -8,11 +8,29 @@ export default function Home() {
 
 
   const [posts , setPosts] = useState([])
+  const inputRef =  useRef("")
+  const [search,setSearch]= useState(false)
   useEffect(() => {
     fetch(process.env.NEXT_PUBLIC_API_URL+'/posts')
     .then((res) =>res.json())
     .then(res => setPosts(res))
   },[])
+
+  const searchPost = (e) =>{
+
+    if(e.type == 'keydown' && e.key !=='Enter'){
+
+      return
+
+    }
+
+    setSearch(true)
+
+    fetch(process.env.NEXT_PUBLIC_API_URL+'/posts?q='+inputRef.current.value)
+    .then((res)=> res.json())
+    .then(res => setPosts(res))
+    .finally(() => setSearch(false))
+  }
 
 
 
@@ -21,12 +39,12 @@ export default function Home() {
     <>    
       <main className="container mx-auto px-4 py-6">
         <h2 className="text-4xl font-bold mb-4 pt-10">Welcome to Our Blog</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <p>A chill little corner of the internet where we drop cool stuff, random thoughts, fun tips, and whatever else we feel like sharing!</p>
       </main>
 
       <div className="flex justify-end px-4 pb-5">
-        <input type="text" className="px-4 py-2 border border-gray-300 rounded-md" placeholder="Search..." />
-        <button className="px-4 py-2 bg-blue-500 text-white rounded-md ml-4">Search</button>
+        <input onKeyDown={searchPost} ref={inputRef} type="text" className="px-4 py-2 border border-gray-300 rounded-md" placeholder="Search..." />
+        <button onClick={searchPost}  disabled={search} className="px-4 py-2 bg-blue-500 text-white rounded-md ml-4 cursor-pointer">{search?'...':'Search'}</button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -40,7 +58,7 @@ export default function Home() {
       </Link>
     ))}
 
-
+         {!posts.length > 0 && inputRef.current.value && <p className="text-center text-md text-red-600"> No posts found for <b className="text-black">"{inputRef.current.value}"</b> </p>}
       </div>
     </>
   );

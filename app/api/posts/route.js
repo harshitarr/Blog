@@ -1,4 +1,4 @@
-import connectMongo from "../../../utils/connectMongo";
+import connectMongo from '../../../utils/connectMongo'
 import PostModel from "../../models/postModels";
 
 export async function GET(req) {
